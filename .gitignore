@@ -93,3 +93,6 @@ __pycache__/
 .Python
 env/
 venv/
+
+# Drawio backup files
+*.drawio.bkp
