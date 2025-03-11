@@ -22,11 +22,10 @@ target_include_directories(nav_components
 )
 
 # Linkujemy zależności
-# TODO: Fix Eigen3 dependencies
-# target_link_libraries(nav_components
-    # PUBLIC
-        # Eigen3::Eigen
-# )
+target_link_libraries(nav_components
+    PUBLIC
+        Eigen3::Eigen
+)
 
 # Definiujemy aplikację główną
 add_executable(itc-dr

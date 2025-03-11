@@ -11,9 +11,8 @@ project(ITCDeadReckoningAnalysis
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Include dependencies
-# TODO: Fix Eigen3 and GoogleTest dependencies
-# include(Dependencies)
-# fetch_dependencies()
+include(Dependencies)
+fetch_dependencies()
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -21,8 +20,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Options
-# TODO: Fix Eigen3 and GoogleTest dependencies
-# option(BUILD_TESTS "Build the test suite" ON)
+
+option(BUILD_TESTS "Build the test suite" ON)
+# TODO: Fix documentation
 # option(BUILD_DOCS "Build documentation" OFF)
 option(ENABLE_WARNINGS "Enable all warnings" ON)
 
@@ -36,8 +36,7 @@ if(ENABLE_WARNINGS)
 endif()
 
 # Find Eigen3
-# TODO: Fix Eigen3 and GoogleTest dependencies
-# find_package(Eigen3 3.3 REQUIRED)
+find_package(Eigen3 3.3 REQUIRED)
 
 # Add subdirectories
 add_subdirectory(src)

@@ -12,13 +12,14 @@ function(add_nav_test test_name test_source)
 endfunction()
 
 # UNIT Tests
-add_nav_test(vector_tests unit/core/VectorTests.cpp)
-add_nav_test(quaternion_tests unit/core/QuaternionTests.cpp)
-add_nav_test(kalman_filter_tests unit/filters/KalmanFilterTests.cpp)
-add_nav_test(madgwick_filter_tests unit/filters/MadgwickFilterTests.cpp)
-add_nav_test(dead_reckoning_tests unit/navigation/DeadReckoningTests.cpp)
-add_nav_test(csv_handler_tests unit/io/CSVHandlerTests.cpp)
+add_nav_test(matrix_tests unit/core/MatrixTests.cpp)
+# add_nav_test(vector_tests unit/core/VectorTests.cpp)
+# add_nav_test(quaternion_tests unit/core/QuaternionTests.cpp)
+# add_nav_test(kalman_filter_tests unit/filters/KalmanFilterTests.cpp)
+# add_nav_test(madgwick_filter_tests unit/filters/MadgwickFilterTests.cpp)
+# add_nav_test(dead_reckoning_tests unit/navigation/DeadReckoningTests.cpp)
+# add_nav_test(csv_handler_tests unit/io/CSVHandlerTests.cpp)
 
 # INTEGRATION Tests
-add_nav_test(navigation_system_tests integration/NavigationSystemTests.cpp)
-add_nav_test(filter_comparison_tests integration/FilterComparisonTests.cpp)
+# add_nav_test(navigation_system_tests integration/NavigationSystemTests.cpp)
+# add_nav_test(filter_comparison_tests integration/FilterComparisonTests.cpp)

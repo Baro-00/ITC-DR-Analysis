@@ -39,9 +39,10 @@ function(fetch_dependencies)
     endif()
 
     # Doxygen package
-    find_package(Doxygen QUIET)
-    if(NOT DOXYGEN_FOUND AND BUILD_DOCS)
-        message(WARNING "Doxygen not found. Documentation will not be generated.")
-        set(BUILD_DOCS OFF CACHE BOOL "Build documentation" FORCE)
-    endif()
+    # TODO: Fix Doxygen
+    # find_package(Doxygen QUIET)
+    # if(NOT DOXYGEN_FOUND AND BUILD_DOCS)
+    #     message(WARNING "Doxygen not found. Documentation will not be generated.")
+    #     set(BUILD_DOCS OFF CACHE BOOL "Build documentation" FORCE)
+    # endif()
 endfunction()
