@@ -1,12 +1,10 @@
-find_package(GTest REQUIRED)
-
 function(add_nav_test test_name test_source)
     add_executable(${test_name} ${test_source})
     target_link_libraries(${test_name}
         PRIVATE
             nav_components
-            GTest::GTest
-            GTest::Main
+            ::gtest
+            ::gtest_main
     )
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
