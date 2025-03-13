@@ -22,7 +22,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Options
 
 option(BUILD_TESTS "Build the test suite" ON)
-# TODO: Fix documentation
+# TODO: Fix documentation (and uncomment the line below)
 # option(BUILD_DOCS "Build documentation" OFF)
 option(ENABLE_WARNINGS "Enable all warnings" ON)
 
@@ -34,9 +34,6 @@ if(ENABLE_WARNINGS)
         add_compile_options(-Wall -Wextra -Wpedantic -Werror)
     endif()
 endif()
-
-# Find Eigen3
-find_package(Eigen3 3.3 REQUIRED)
 
 # Add subdirectories
 add_subdirectory(src)
@@ -55,10 +52,32 @@ if(BUILD_DOCS)
     endif()
 endif()
 
-# Install
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
+# # TODO: What is this?
+# include(CMakePackageConfigHelpers)
+# write_basic_package_version_file(
+#     "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+#     VERSION ${PROJECT_VERSION}
+#     COMPATIBILITY SameMajorVersion
+# )
+
+# # Install config
+# install(TARGETS nav_components
+#     EXPORT ${PROJECT_NAME}Targets
+#     LIBRARY DESTINATION lib
+#     ARCHIVE DESTINATION lib
+#     RUNTIME DESTINATION bin
+#     INCLUDES DESTINATION include
+# )
+
+# # Install headers
+# install(DIRECTORY src/
+#     DESTINATION include
+#     FILES_MATCHING PATTERN "*.h"
+# )
+
+# # Install config files
+# install(EXPORT ${PROJECT_NAME}Targets
+#     FILE ${PROJECT_NAME}Targets.cmake
+#     NAMESPACE ${PROJECT_NAME}::
+#     DESTINATION lib/cmake/${PROJECT_NAME}
+# )
