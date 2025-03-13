@@ -84,7 +84,7 @@ Quaternion Quaternion::normalized() const {
 
 // Quaternion conjugate
 Quaternion Quaternion::conjugate() const {
-    return Quaternion(w, -v.getX(), -v.getY(), -v.getZ());
+    return Quaternion(w, -(v.getX()), -(v.getY()), -(v.getZ()));
 }
 
 // Quaternion inverse
@@ -93,7 +93,7 @@ Quaternion Quaternion::inverse() const {
     if (n_squared < 1e-10) {
         throw std::domain_error("Cannot compute inverse of quaternion with near-zero norm");
     }
-    return Quaternion(w/n_squared, -v.getX()/n_squared, -v.getY()/n_squared, -v.getZ()/n_squared);
+    return Quaternion(w/n_squared, -(v.getX())/n_squared, -(v.getY())/n_squared, -(v.getZ())/n_squared);
 }
 
 // Addition of quaternions
@@ -101,7 +101,6 @@ Quaternion Quaternion::operator+(const Quaternion& other) const {
     return Quaternion(this->w + other.getW(), this->getX() + other.getX(), this->getY() + other.getY(), this->getZ() + other.getZ());
 }
 
-// * HERE NOW
 // Subtraction of quaternions
 Quaternion Quaternion::operator-(const Quaternion& other) const {
     return Quaternion(w - other.getW(), getX() - other.getX(), getY() - other.getY(), getZ() - other.getZ());
@@ -111,9 +110,9 @@ Quaternion Quaternion::operator-(const Quaternion& other) const {
 Quaternion Quaternion::operator*(const Quaternion& other) const {
     return Quaternion(
         w * other.getW() - getX() * other.getX() - getY() * other.getY() - getZ() * other.getZ(),
-        w * other.getX() + getX() * other.getW() + getY() * other.getY() - getZ() * other.getY(),
-        w * other.getY() - getX() * other.getZ() + getY() * other.getW() + getZ() * other.getX(),
-        w * other.getZ() + getX() * other.getY() - getY() * other.getX() + getZ() * other.getW()
+        w * other.getX() + getX() * other.getW() + getY() * other.getZ() - getZ() * other.getY(),
+        w * other.getY() + getY() * other.getW() + getZ() * other.getX() - getX() * other.getZ(),
+        w * other.getZ() + getZ() * other.getW() + getX() * other.getY() - getY() * other.getX()
     );
 }
 
