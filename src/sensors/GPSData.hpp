@@ -2,6 +2,7 @@
 #pragma once
 
 #include "core/Vector3D.hpp"
+#include "utils/Constants.hpp"
 
 /**
  * @brief Class for storing and managing GPS data

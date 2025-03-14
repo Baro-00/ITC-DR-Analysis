@@ -1,6 +1,5 @@
 // GPSData.cpp
 #include "GPSData.hpp"
-#include "utils/Constants.hpp"
 #include <cmath>
 
 // Earth radius in meters
