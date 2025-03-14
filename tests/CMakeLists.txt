@@ -3,8 +3,8 @@ function(add_nav_test test_name test_source)
     target_link_libraries(${test_name}
         PRIVATE
             nav_components
-            ::gtest
-            ::gtest_main
+            gtest
+            gtest_main
     )
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()

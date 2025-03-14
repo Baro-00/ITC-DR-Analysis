@@ -20,6 +20,13 @@ function(fetch_dependencies)
                 GIT_TAG 3.4.0
             )
             FetchContent_MakeAvailable(eigen)
+
+            if(NOT TARGET Eigen3::Eigen)
+                add_library(Eigen3::Eigen INTERFACE IMPORTED)
+                set_target_properties(Eigen3::Eigen PROPERTIES
+                    INTERFACE_INCLUDE_DIRECTORIES "${eigen_SOURCE_DIR}"
+                )
+            endif()
         endif()
     endif()
 
@@ -33,16 +40,9 @@ function(fetch_dependencies)
             GIT_TAG release-1.12.1
         )
         # Disable installation of GoogleTest
-        set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
         set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+        set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
         FetchContent_MakeAvailable(googletest)
     endif()
-
-    # Doxygen package
-    # TODO: Fix Doxygen
-    # find_package(Doxygen QUIET)
-    # if(NOT DOXYGEN_FOUND AND BUILD_DOCS)
-    #     message(WARNING "Doxygen not found. Documentation will not be generated.")
-    #     set(BUILD_DOCS OFF CACHE BOOL "Build documentation" FORCE)
-    # endif()
 endfunction()
