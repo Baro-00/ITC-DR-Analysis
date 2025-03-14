@@ -61,79 +61,149 @@ bool GPSData::isValid() const {
 }
 
 Vector3D GPSData::toENU(double referenceLatitude, double referenceLongitude, double referenceAltitude) const {
-    // Convert degrees to radians
-    double lat = deg2rad(latitude);
-    double lon = deg2rad(longitude);
-    double refLat = deg2rad(referenceLatitude);
-    double refLon = deg2rad(referenceLongitude);
+    // Użyj long double dla wyższej precyzji
+    const long double DEG_TO_RAD = M_PI / 180.0L;
     
-    // Calculate differences
-    double dLat = lat - refLat;
-    double dLon = lon - refLon;
-    double dAlt = altitude - referenceAltitude;
+    // Dokładniejsze parametry elipsoidy WGS84
+    const long double a = 6378137.0L;          
+    const long double f = 1.0L / 298.257223563L; 
+    const long double e2 = 2.0L * f - f * f;    
+
+    // Konwersja do radianów z wyższą precyzją
+    long double lat1 = referenceLatitude * DEG_TO_RAD;
+    long double lon1 = referenceLongitude * DEG_TO_RAD;
+    long double lat2 = latitude * DEG_TO_RAD;
+    long double lon2 = longitude * DEG_TO_RAD;
     
-    // Calculate east component
-    double east = dLon * EARTH_RADIUS * std::cos(refLat);
+    // Bardziej precyzyjne obliczenia
+    long double N1 = a / sqrtl(1.0L - e2 * sinl(lat1) * sinl(lat1));
+    long double N2 = a / sqrtl(1.0L - e2 * sinl(lat2) * sinl(lat2));
     
-    // Calculate north component
-    double north = dLat * EARTH_RADIUS;
+    // Obliczenia ECEF z wyższą precyzją
+    long double x1 = (N1 + referenceAltitude) * cosl(lat1) * cosl(lon1);
+    long double y1 = (N1 + referenceAltitude) * cosl(lat1) * sinl(lon1);
+    long double z1 = (N1 * (1.0L - e2) + referenceAltitude) * sinl(lat1);
     
-    // Up component is simply altitude difference
-    double up = dAlt;
+    long double x2 = (N2 + altitude) * cosl(lat2) * cosl(lon2);
+    long double y2 = (N2 + altitude) * cosl(lat2) * sinl(lon2);
+    long double z2 = (N2 * (1.0L - e2) + altitude) * sinl(lat2);
     
-    return Vector3D(east, north, up);
+    // Precyzyjne różnice współrzędnych
+    long double dx = x2 - x1;
+    long double dy = y2 - y1;
+    long double dz = z2 - z1;
+    
+    // Transformacja z wyższą precyzją
+    long double east  = -sinl(lon1) * dx + cosl(lon1) * dy;
+    long double north = -sinl(lat1) * cosl(lon1) * dx 
+                        - sinl(lat1) * sinl(lon1) * dy 
+                        + cosl(lat1) * dz;
+    long double up    = cosl(lat1) * cosl(lon1) * dx 
+                        + cosl(lat1) * sinl(lon1) * dy 
+                        + sinl(lat1) * dz;
+    
+    // Konwersja z powrotem do double
+    return Vector3D(static_cast<double>(east), 
+                    static_cast<double>(north), 
+                    static_cast<double>(up));
 }
 
 void GPSData::fromENU(const Vector3D& enuPosition, double referenceLatitude, double referenceLongitude, double referenceAltitude) {
-    // Extract ENU components
+    // Constants for coordinate conversion
+    const double DEG_TO_RAD = M_PI / 180.0;
+    const double RAD_TO_DEG = 180.0 / M_PI;
+    
+    // WGS84 ellipsoid parameters
+    const double a = 6378137.0;          // Semi-major axis length [m]
+    const double f = 1.0 / 298.257223563; // Flattening
+    const double e2 = 2.0 * f - f * f;    // First eccentricity squared
+    
+    // Convert reference point to radians
+    double refLat = referenceLatitude * DEG_TO_RAD;
+    double refLon = referenceLongitude * DEG_TO_RAD;
+    
+    // Extract ENU coordinates
     double east = enuPosition.getX();
     double north = enuPosition.getY();
     double up = enuPosition.getZ();
     
-    // Convert reference to radians
-    double refLat = deg2rad(referenceLatitude);
-    double refLon = deg2rad(referenceLongitude);
+    // Calculate prime vertical radius of curvature for reference point
+    double N_ref = a / sqrt(1.0 - e2 * sin(refLat) * sin(refLat));
     
-    // Calculate latitude change
-    double dLat = north / EARTH_RADIUS;
+    // ECEF coordinates of reference point
+    double x_ref = (N_ref + referenceAltitude) * cos(refLat) * cos(refLon);
+    double y_ref = (N_ref + referenceAltitude) * cos(refLat) * sin(refLon);
+    double z_ref = (N_ref * (1.0 - e2) + referenceAltitude) * sin(refLat);
     
-    // Calculate longitude change
-    double dLon = east / (EARTH_RADIUS * std::cos(refLat));
+    // ENU to ECEF transformation matrix
+    double dX = -sin(refLon) * east - sin(refLat) * cos(refLon) * north + cos(refLat) * cos(refLon) * up;
+    double dY = cos(refLon) * east - sin(refLat) * sin(refLon) * north + cos(refLat) * sin(refLon) * up;
+    double dZ = cos(refLat) * north + sin(refLat) * up;
+    
+    // Calculate ECEF coordinates of the target point
+    double x = x_ref + dX;
+    double y = y_ref + dY;
+    double z = z_ref + dZ;
+    
+    // Convert ECEF to geodetic coordinates
+    double p = sqrt(x*x + y*y);
+    
+    // Iterative calculation of latitude
+    double lat = atan2(z, p * (1.0 - e2));
+    for (int i = 0; i < 5; ++i) {
+        double N = a / sqrt(1.0 - e2 * sin(lat) * sin(lat));
+        double h = p / cos(lat) - N;
+        double latNew = atan2(z, p * (1.0 - e2 * N / (N + h)));
+        
+        if (fabs(lat - latNew) < 1e-9) break;
+        lat = latNew;
+    }
+    
+    // Calculate longitude and altitude
+    double lon = atan2(y, x);
+    double N = a / sqrt(1.0 - e2 * sin(lat) * sin(lat));
+    double h = p / cos(lat) - N;
     
     // Convert back to degrees
-    latitude = rad2deg(refLat + dLat);
-    longitude = rad2deg(refLon + dLon);
-    
-    // Set altitude
-    altitude = referenceAltitude + up;
+    latitude = lat * RAD_TO_DEG;
+    longitude = lon * RAD_TO_DEG;
+    altitude = h;
 }
 
 double GPSData::distanceTo(const GPSData& other) const {
-    // Haversine formula for distance between two points on a sphere
+    // Constant for converting degrees to radians
+    const double DEG_TO_RAD = M_PI / 180.0;
     
-    // Earth radius in meters
-    const double R = EARTH_RADIUS;
+    // WGS84 ellipsoid parameters
+    const double a = 6378137.0;         // Semi-major axis [m]
+    const double f = 1.0 / 298.257223563; // Flattening
+    const double e2 = 2.0 * f - f * f;    // First eccentricity squared
     
-    // Convert latitude and longitude to radians
-    double lat1 = deg2rad(latitude);
-    double lon1 = deg2rad(longitude);
-    double lat2 = deg2rad(other.latitude);
-    double lon2 = deg2rad(other.longitude);
+    // Convert to radians
+    double lat1 = latitude * DEG_TO_RAD;
+    double lon1 = longitude * DEG_TO_RAD;
+    double lat2 = other.latitude * DEG_TO_RAD;
+    double lon2 = other.longitude * DEG_TO_RAD;
     
-    // Differences
-    double dLat = lat2 - lat1;
-    double dLon = lon2 - lon1;
+    // Curvature radius in the prime vertical for both points
+    double N1 = a / sqrt(1.0 - e2 * sin(lat1) * sin(lat1));
+    double N2 = a / sqrt(1.0 - e2 * sin(lat2) * sin(lat2));
     
-    // Haversine formula
-    double a = std::sin(dLat/2) * std::sin(dLat/2) +
-               std::cos(lat1) * std::cos(lat2) *
-               std::sin(dLon/2) * std::sin(dLon/2);
-    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1-a));
-    double distance = R * c;
+    // ECEF Cartesian coordinates of point 1
+    double X1 = (N1 + altitude) * cos(lat1) * cos(lon1);
+    double Y1 = (N1 + altitude) * cos(lat1) * sin(lon1);
+    double Z1 = (N1 * (1.0 - e2) + altitude) * sin(lat1);
     
-    // Add altitude difference using Pythagorean theorem
-    double altDiff = other.altitude - altitude;
-    distance = std::sqrt(distance*distance + altDiff*altDiff);
+    // ECEF Cartesian coordinates of point 2
+    double X2 = (N2 + other.altitude) * cos(lat2) * cos(lon2);
+    double Y2 = (N2 + other.altitude) * cos(lat2) * sin(lon2);
+    double Z2 = (N2 * (1.0 - e2) + other.altitude) * sin(lat2);
     
-    return distance;
+    // Calculate distance
+    double dX = X2 - X1;
+    double dY = Y2 - Y1;
+    double dZ = Z2 - Z1;
+    
+    // Return distance
+    return sqrt(dX*dX + dY*dY + dZ*dZ);
 }
