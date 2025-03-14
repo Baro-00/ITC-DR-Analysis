@@ -9,8 +9,9 @@ add_library(nav_components
     io/CSVHandler.cpp
     navigation/NavigationSystem.cpp
     navigation/DeadReckoning.cpp
-    sensors/SensorData.cpp
+    sensors/IMUData.cpp
     sensors/GPSData.cpp
+    sensors/SensorData.cpp
 )
 
 target_include_directories(nav_components
