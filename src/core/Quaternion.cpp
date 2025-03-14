@@ -1,5 +1,6 @@
 // Quaternion.cpp
 #include "Quaternion.hpp"
+#include "utils/Constants.hpp"
 #include <cmath>
 #include <stdexcept>
 
